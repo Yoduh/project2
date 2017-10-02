@@ -41,7 +41,7 @@ public class Project2 {
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
 		**/
-		inputReader = new BufferedReader(new FileReader(new File("C:\\Users\\Yoduh\\Desktop\\CSC\\316\\Assignments\\Project 2\\small-input.txt")));
+		inputReader = new BufferedReader(new FileReader(new File("C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\small-input.txt")));
 		while(inputReader.ready()) {
 			System.out.println(inputReader.readLine());
 		}
