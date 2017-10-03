@@ -11,10 +11,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import proj2.Tree.Node;
+
 public class Project2 {
+	//home file
+	String home = "C:\\Users\\Yoduh\\Desktop\\CSC\\316\\Assignments\\input.txt";
+	//work file
+	String work = "C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\small-input.txt";
 	
 	public Character[] pretrav = new Character[256];
 	public Character[] posttrav = new Character[256];
+	Tree<Character> myTree = new Tree<Character>();
 
 	public Project2() {
 		// TODO Auto-generated constructor stub
@@ -41,11 +48,60 @@ public class Project2 {
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
 		**/
-		inputReader = new BufferedReader(new FileReader(new File("C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\small-input.txt")));
-		while(inputReader.ready()) {
-			System.out.println(inputReader.readLine());
+		inputReader = new BufferedReader(new FileReader(new File(home)));
+		
+		// populate pretrav array
+		String preString = inputReader.readLine();
+		int size = 0;
+		for(int i = 2; i < preString.length() - 1; i += 3) {
+			pretrav[size] = preString.charAt(i);
+			size++;
+		}
+		
+		// populate posttrav array
+		String postString = inputReader.readLine();
+		size = 0;
+		for(int i = 2; i < postString.length() - 1; i += 3) {
+			posttrav[size] = postString.charAt(i);
+			size++;
+		}
+		
+		//debug
+		size = 0;
+		while(pretrav[size] != null) {
+			System.out.print(pretrav[size] + ", ");
+			size++;
+		}
+		size = 0;
+		System.out.println();
+		while(pretrav[size] != null) {
+			System.out.print(posttrav[size] + ", ");
+			size++;
 		}
 		inputReader.close();
+		
+		Node<Character> root = buildTree(size, 0, 0);
+		
 		outputWriter.close();
+	}
+
+	public Node<Character> buildTree(int size, int prestart, int poststart) {
+		if(pretrav[prestart] == null) {
+			//Node<Character> 
+		}
+		if(size > 0 && myTree.isEmpty()) {
+			myTree.addRoot(pretrav[prestart]);
+			prestart++;
+		} else if(size > 1) {
+			int count = poststart;
+			while(pretrav[prestart + 1] != posttrav[count]) {
+				count++;
+			}
+			count++;
+			Node<Character> parent = new Node<Character>(pretrav[prestart], null, null);
+		} else if(size == 1) {
+			
+		}
+		return null;
 	}
 }
