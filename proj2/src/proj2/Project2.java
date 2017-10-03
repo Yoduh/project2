@@ -17,7 +17,7 @@ public class Project2 {
 	//home file
 	String home = "C:\\Users\\Yoduh\\Desktop\\CSC\\316\\Assignments\\input.txt";
 	//work file
-	String work = "C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\small-input.txt";
+	String work = "C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\input.txt";
 	
 	public Character[] pretrav = new Character[256];
 	public Character[] posttrav = new Character[256];
@@ -48,7 +48,7 @@ public class Project2 {
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
 		**/
-		inputReader = new BufferedReader(new FileReader(new File(home)));
+		inputReader = new BufferedReader(new FileReader(new File(work)));
 		
 		// populate pretrav array
 		String preString = inputReader.readLine();
@@ -87,20 +87,28 @@ public class Project2 {
 
 	public Node<Character> buildTree(int size, int prestart, int poststart) {
 		if(pretrav[prestart] == null) {
-			//Node<Character> 
+			return null;
 		}
 		if(size > 0 && myTree.isEmpty()) {
 			myTree.addRoot(pretrav[prestart]);
 			prestart++;
 		} else if(size > 1) {
-			int count = poststart;
-			while(pretrav[prestart + 1] != posttrav[count]) {
-				count++;
+			if(posttrav[poststart + size - 1] == pretrav[prestart]) {
+				// start of pretrav == end of posttrav, so we have a subtree here
+				// create parent?
+				Node<Character> parent = new Node<Character>(pretrav[prestart], null, null);
+			} else {
+				// else we need to look for next subtree
+				int count = poststart;
+				while(pretrav[prestart + 1] != posttrav[count]) {
+					count++;
+				}
+				count++; // one more to include the parent
+				// recursive call with new prestart/poststart?
 			}
-			count++;
-			Node<Character> parent = new Node<Character>(pretrav[prestart], null, null);
 		} else if(size == 1) {
-			
+			// create child
+			return new Node<Character>(pretrav[prestart], null, null);
 		}
 		return null;
 	}
