@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /** Concrete implementation of a general tree using a node-based, linked structure. */
 public class Tree<E> {
 	
-	protected Node<E> root = null;
+	private Node<E> root = null;
 	private int size = 0;
 
 	//---------------- nested Node class ----------------
@@ -14,6 +14,7 @@ public class Tree<E> {
 		private E element;
 		private Node<E> parent;
 		private LinkedList<Node<E>> children;
+		private int mark;
 		
 		public Node(E e, Node<E> above, LinkedList<Node<E>> below) {
 			element = e;
@@ -22,6 +23,7 @@ public class Tree<E> {
 			if(below != null) {
 				children = below;
 			}
+			mark = 0;
 		}
 		// accessor methods
 		/**
@@ -60,6 +62,21 @@ public class Tree<E> {
 		
 		public void setChild(Node<E> c) {
 			children.add(c);
+		}
+		
+		public void setMark() {
+			mark = 1;
+		}
+		
+		public void clearMark() {
+			mark = 0;
+		}
+		
+		public boolean isMarked() {
+			if(mark == 1) {
+				return true;
+			}
+			return false;
 		}
 	} //----------- end of nested Node class -----------
 	
@@ -130,5 +147,52 @@ public class Tree<E> {
 	public Iterable<Node<E>> positions() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public void clearAllMarks() {
+		// clear all marks
+	}
+	
+	public Node<E> getNode(E e, Node<E> p) {
+		int flag = 0;
+		if(p.getElement().equals(e)) {
+			flag = 1;
+			return p;
+		}
+		for(Node<E> child : p.getChildren()) {
+			getNode(e, child);
+			if(flag == 1) {
+				return child;
+			}
+		}
+		return null;
+	}
+	
+	public void markAncestors(Node<E> a) {
+		// mark a and all ancestors of a
+		a.setMark();
+		if(numChildren(a) > 0) {
+			for(Node<E> child : a.getChildren()) {
+				markAncestors(child);
+			}
+		}
+	}
+	
+	public int findCommonAncestor(Node<E> b) {
+		// search B, B's parent, grandparent, until marked node is found
+		int path = 0;
+		while(!isRoot(b)) {
+			if(b.isMarked()) {
+				return path;
+			}
+			b = b.getParent();
+			path++;
+		}
+		// check one last time now that b is root
+		if(b.isMarked()) {
+			return path;
+		}
+		// common ancestor not found
+		return -1;
 	}
 }

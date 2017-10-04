@@ -82,6 +82,9 @@ public class Project2 {
 		
 		myTree.addRoot(buildTree(size, 0, 0));
 		System.out.println("root: " + myTree.root().getElement());
+		
+		Node<Character> n = myTree.getNode('B', myTree.root());
+		System.out.println("n" + n);
 		/*
 		Node<Character> n = myTree.root();
 		int i = 0;
