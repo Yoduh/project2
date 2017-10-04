@@ -154,18 +154,13 @@ public class Tree<E> {
 	}
 	
 	public Node<E> getNode(E e, Node<E> p) {
-		int flag = 0;
-		if(p.getElement().equals(e)) {
-			flag = 1;
-			return p;
-		}
 		for(Node<E> child : p.getChildren()) {
-			getNode(e, child);
-			if(flag == 1) {
-				return child;
+			Node<E> c = getNode(e, child);
+			if(c.getElement().equals(e)) {
+				return c;
 			}
 		}
-		return null;
+		return p;
 	}
 	
 	public void markAncestors(Node<E> a) {
