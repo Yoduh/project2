@@ -48,7 +48,7 @@ public class Project2 {
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
 		**/
-		inputReader = new BufferedReader(new FileReader(new File(work)));
+		inputReader = new BufferedReader(new FileReader(new File(home)));
 		
 		// populate pretrav array
 		String preString = inputReader.readLine();
@@ -80,36 +80,77 @@ public class Project2 {
 		}
 		inputReader.close();
 		
-		Node<Character> root = buildTree(size, 0, 0);
+		myTree.addRoot(buildTree(size, 0, 0));
+		System.out.println("root: " + myTree.root().getElement());
+		/*
+		Node<Character> n = myTree.root();
+		int i = 0;
+		while(i < n.getChildren().size()) {
+			System.out.println("parent: " + n.getElement());
+			int j = 0;
+			while(j < n.getChildren().size()) {
+				System.out.println("child: " + n.getChildren().get(j).getElement());
+				j++;
+			}
+			if(n.getChildren().get(i).getChildren().size() > 0) {
+				n = n.getChildren().get(i).getChildren().get(i);
+				i = 0;
+				System.out.println("parent: " + n.getElement());
+				j = 0;
+				while(j < n.getChildren().size()) {
+					System.out.println("child: " + n.getChildren().get(j).getElement());
+					j++;
+				}
+			}
+			i++;
+		}
+		*/
 		
 		outputWriter.close();
 	}
 
 	public Node<Character> buildTree(int size, int prestart, int poststart) {
+		System.out.println("\ncalled: buildTree(" + size + ", " + prestart + ", " + poststart + ")");
+		
+		Node<Character> root = new Node<Character>(pretrav[prestart], null, null);
+		
 		if(pretrav[prestart] == null) {
 			return null;
 		}
-		if(size > 0 && myTree.isEmpty()) {
-			myTree.addRoot(pretrav[prestart]);
-			prestart++;
-		} else if(size > 1) {
-			if(posttrav[poststart + size - 1] == pretrav[prestart]) {
-				// start of pretrav == end of posttrav, so we have a subtree here
-				// create parent?
-				Node<Character> parent = new Node<Character>(pretrav[prestart], null, null);
-			} else {
-				// else we need to look for next subtree
-				int count = poststart;
-				while(pretrav[prestart + 1] != posttrav[count]) {
-					count++;
+		if(size > 1) {
+			if(pretrav[prestart] == posttrav[poststart + size - 1] && pretrav[prestart + 1] == posttrav[poststart]) {
+				// start of pretrav == end of posttrav, and pretrav[1] == posttrav[0], so we have a final subtree here
+				// create children and add to current subtree root node
+				for(int i = 0; i < size - 1; i++) {
+					Node<Character> c = buildTree(1, prestart + i + 1, poststart + i);
+					myTree.addChild(root, c);
+					c.setParent(root);
 				}
-				count++; // one more to include the parent
-				// recursive call with new prestart/poststart?
+				return root;
+				
+			} else {
+				while(pretrav[prestart + 1] != null) {
+					// else there is a deeper subtree to find
+					int count = poststart;
+					
+					while(pretrav[prestart + 1] != posttrav[count]) {
+						count++;
+					}
+					count++; // one more to include the parent
+					// recursive call with new prestart/poststart?
+					prestart++;
+					Node<Character> c = buildTree(count - poststart, prestart, poststart);
+					myTree.addChild(root, c);
+					c.setParent(root);
+					
+					prestart = count + 1;
+					poststart += count - poststart;
+				}
 			}
 		} else if(size == 1) {
 			// create child
-			return new Node<Character>(pretrav[prestart], null, null);
+			return root;
 		}
-		return null;
+		return root;
 	}
 }

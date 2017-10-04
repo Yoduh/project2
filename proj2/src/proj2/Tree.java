@@ -18,7 +18,10 @@ public class Tree<E> {
 		public Node(E e, Node<E> above, LinkedList<Node<E>> below) {
 			element = e;
 			parent = above;
-			children = below;
+			children = new LinkedList<Node<E>>();
+			if(below != null) {
+				children = below;
+			}
 		}
 		// accessor methods
 		/**
@@ -79,9 +82,8 @@ public class Tree<E> {
 		return p.getParent();
 	}
 
-	public Iterable<Node<E>> children(Node<E> p) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+	public LinkedList<Node<E>> children(Node<E> p) throws IllegalArgumentException {
+		return p.getChildren();
 	}
 
 	public int numChildren(Node<E> p) throws IllegalArgumentException {
@@ -89,17 +91,13 @@ public class Tree<E> {
 		return list.size();
 	}
 	
-	public void addChild(Node<E> p, E e) {
-		Node<E> child = createNode(e, p, null);
-		p.setChild(child);
+	public void addChild(Node<E> p, Node<E> c) {
+		p.setChild(c);
 		size++;
 	}
 	
-	public Node<E> addRoot(E e) throws IllegalStateException {
-		if(!isEmpty()) {
-			throw new IllegalStateException("Tree is not empty");
-		}
-		root = createNode(e, null, null);
+	public Node<E> addRoot(Node<E> e) throws IllegalStateException {
+		root = e;
 		size = 1;
 		return root;
 	}
