@@ -48,7 +48,7 @@ public class Project2 {
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
 		**/
-		inputReader = new BufferedReader(new FileReader(new File(home)));
+		inputReader = new BufferedReader(new FileReader(new File(work)));
 		
 		// populate pretrav array
 		String preString = inputReader.readLine();
@@ -129,7 +129,7 @@ public class Project2 {
 				return root;
 				
 			} else {
-				while(pretrav[prestart + 1] != null) {
+				while(poststart < size - 1) {
 					// else there is a deeper subtree to find
 					int count = poststart;
 					
@@ -137,19 +137,17 @@ public class Project2 {
 						count++;
 					}
 					count++; // one more to include the parent
+					count = count - poststart; // count = number of nodes in subtree
 					// recursive call with new prestart/poststart?
 					prestart++;
-					Node<Character> c = buildTree(count - poststart, prestart, poststart);
+					Node<Character> c = buildTree(count, prestart, poststart);
 					myTree.addChild(root, c);
 					c.setParent(root);
 					
-					prestart = count + 1;
-					poststart += count - poststart;
+					prestart += count - 1;
+					poststart += count;
 				}
 			}
-		} else if(size == 1) {
-			// create child
-			return root;
 		}
 		return root;
 	}
