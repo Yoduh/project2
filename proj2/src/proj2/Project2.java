@@ -39,17 +39,18 @@ public class Project2 {
 		
 		BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 		BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(System.out));
-		/**
+		
 		if(!inputReader.ready()) {
 			System.out.println("Enter an input filename (e.g. \"filename.txt\"): ");
 			File inputFileName = new File(inputReader.readLine());
+			System.out.println("file=" + inputFileName.getAbsolutePath());
 			System.out.println("Enter an output filename (e.g. \"filename.txt\"): ");
 			File outputFileName = new File(inputReader.readLine());
 			inputReader = new BufferedReader(new FileReader(inputFileName));
 			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
 		}
-		**/
-		inputReader = new BufferedReader(new FileReader(new File(work)));
+		
+		//inputReader = new BufferedReader(new FileReader(new File(work)));
 		
 		// populate pretrav array
 		String preString = inputReader.readLine();
@@ -86,7 +87,8 @@ public class Project2 {
 		while(inputReader.ready()) {
 			String relation = inputReader.readLine();
 			if(!relation.isEmpty() && relation.charAt(0) == '?') {
-				System.out.println(getRelation(relation.charAt(2), relation.charAt(5)));
+				outputWriter.write(getRelation(relation.charAt(2), relation.charAt(5)) + "\n");
+				//System.out.println(getRelation(relation.charAt(2), relation.charAt(5)));
 			}
 		}
 		
@@ -98,9 +100,11 @@ public class Project2 {
 		System.out.println(getRelation('P', 'Q'));
 		System.out.println(getRelation('H', 'N'));
 		System.out.println(getRelation('B', 'N'));*/
-		
 		try {
-			printLevelOrderTree();
+			String tree = printLevelOrderTree();
+			if(tree != null) {
+				outputWriter.write(tree + "\n");
+			}
 		} catch (FullQueueException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,9 +159,10 @@ public class Project2 {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void printLevelOrderTree() throws FullQueueException, EmptyQueueException {
+	public String printLevelOrderTree() throws FullQueueException, EmptyQueueException {
+		String tree = "";
 		if(myTree.root() == null) {
-			return;
+			return null;
 		}
 		Character[] inordertrav = new Character[256];
 		int i = 0;
@@ -174,9 +179,11 @@ public class Project2 {
 		}
 		
 		for(int j = 0; j < i - 1; j++) {
-			System.out.print(inordertrav[j] + ", ");
+			tree += inordertrav[j] + ", ";
 		}
-		System.out.print(inordertrav[i - 1] + ".");
+		tree += inordertrav[i - 1] + ".";
+		
+		return tree;
 	}
 	
 	public void clearAllMarks(Node<Character> p) {
