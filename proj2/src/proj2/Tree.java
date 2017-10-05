@@ -64,16 +64,20 @@ public class Tree<E> {
 			children.add(c);
 		}
 		
-		public void setMark() {
-			mark = 1;
+		public void setMark(int m) {
+			mark = m;
 		}
 		
 		public void clearMark() {
 			mark = 0;
 		}
 		
+		public int getMark() {
+			return mark;
+		}
+		
 		public boolean isMarked() {
-			if(mark == 1) {
+			if(mark > 0) {
 				return true;
 			}
 			return false;
@@ -148,9 +152,14 @@ public class Tree<E> {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	public void clearAllMarks() {
-		// clear all marks
+	/*
+	public void clearAllMarks(Node<E> p) {
+		p.clearMark();
+		if(numChildren(p) > 0) {
+			for(Node<E> child : p.getChildren()) {
+				clearAllMarks(child);
+			}
+		}
 	}
 	
 	public Node<E> getNode(E e, Node<E> p) {
@@ -165,29 +174,32 @@ public class Tree<E> {
 	
 	public void markAncestors(Node<E> a) {
 		// mark a and all ancestors of a
-		a.setMark();
-		if(numChildren(a) > 0) {
-			for(Node<E> child : a.getChildren()) {
-				markAncestors(child);
-			}
+		int i = 0;
+		a.setMark(0);
+		while(!isRoot(a)) {
+			a = a.getParent();
+			a.setMark(++i);
 		}
 	}
 	
-	public int findCommonAncestor(Node<E> b) {
+	public int[] findCommonAncestor(Node<E> b) {
 		// search B, B's parent, grandparent, until marked node is found
 		int path = 0;
 		while(!isRoot(b)) {
 			if(b.isMarked()) {
-				return path;
+				int[] vals = {b.getMark(), path};
+				return vals;
 			}
 			b = b.getParent();
 			path++;
 		}
 		// check one last time now that b is root
 		if(b.isMarked()) {
-			return path;
+			int[] vals = {b.getMark(), path};
+			return vals;
 		}
 		// common ancestor not found
-		return -1;
+		return null;
 	}
+	*/
 }

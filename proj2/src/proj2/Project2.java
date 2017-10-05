@@ -9,8 +9,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 
+import proj2.Queue.EmptyQueueException;
+import proj2.Queue.FullQueueException;
 import proj2.Tree.Node;
 
 public class Project2 {
@@ -67,7 +68,7 @@ public class Project2 {
 		}
 		
 		//debug
-		size = 0;
+		/*size = 0;
 		while(pretrav[size] != null) {
 			System.out.print(pretrav[size] + ", ");
 			size++;
@@ -77,46 +78,42 @@ public class Project2 {
 		while(pretrav[size] != null) {
 			System.out.print(posttrav[size] + ", ");
 			size++;
-		}
-		inputReader.close();
+		}*/
+		
 		
 		myTree.addRoot(buildTree(size, 0, 0));
-		System.out.println("root: " + myTree.root().getElement());
 		
-		Node<Character> n = myTree.getNode('T', myTree.root());
-		System.out.println("n = " + n.getElement());
-		myTree.markAncestors(n);
-		System.out.println("hi");
-		/*
-		Node<Character> n = myTree.root();
-		int i = 0;
-		while(i < n.getChildren().size()) {
-			System.out.println("parent: " + n.getElement());
-			int j = 0;
-			while(j < n.getChildren().size()) {
-				System.out.println("child: " + n.getChildren().get(j).getElement());
-				j++;
+		while(inputReader.ready()) {
+			String relation = inputReader.readLine();
+			if(!relation.isEmpty() && relation.charAt(0) == '?') {
+				System.out.println(getRelation(relation.charAt(2), relation.charAt(5)));
 			}
-			if(n.getChildren().get(i).getChildren().size() > 0) {
-				n = n.getChildren().get(i).getChildren().get(i);
-				i = 0;
-				System.out.println("parent: " + n.getElement());
-				j = 0;
-				while(j < n.getChildren().size()) {
-					System.out.println("child: " + n.getChildren().get(j).getElement());
-					j++;
-				}
-			}
-			i++;
 		}
-		*/
 		
+		/*System.out.println(getRelation('H', 'X'));
+		System.out.println(getRelation('X', 'H'));
+		System.out.println(getRelation('B', 'F'));
+		System.out.println(getRelation('C', 'B'));
+		System.out.println(getRelation('B', 'R'));
+		System.out.println(getRelation('P', 'Q'));
+		System.out.println(getRelation('H', 'N'));
+		System.out.println(getRelation('B', 'N'));*/
+		
+		try {
+			printLevelOrderTree();
+		} catch (FullQueueException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (EmptyQueueException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		inputReader.close();
 		outputWriter.close();
 	}
 
 	public Node<Character> buildTree(int size, int prestart, int poststart) {
-		System.out.println("\ncalled: buildTree(" + size + ", " + prestart + ", " + poststart + ")");
-		
 		Node<Character> root = new Node<Character>(pretrav[prestart], null, null);
 		
 		if(pretrav[prestart] == null) {
@@ -155,5 +152,173 @@ public class Project2 {
 			}
 		}
 		return root;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void printLevelOrderTree() throws FullQueueException, EmptyQueueException {
+		if(myTree.root() == null) {
+			return;
+		}
+		Character[] inordertrav = new Character[256];
+		int i = 0;
+		Queue q = new Queue();
+		Node<Character> p = myTree.root();
+		q.enqueue(p);
+		while(!q.isEmpty()) {
+			p = (Node<Character>) q.dequeue();
+			inordertrav[i] = p.getElement();
+			i++;
+			for(Node<Character> child : p.getChildren()) {
+				q.enqueue(child);
+			}
+		}
+		
+		for(int j = 0; j < i - 1; j++) {
+			System.out.print(inordertrav[j] + ", ");
+		}
+		System.out.print(inordertrav[i - 1] + ".");
+	}
+	
+	public void clearAllMarks(Node<Character> p) {
+		p.clearMark();
+		while(!myTree.isRoot(p)) {
+			p = p.getParent();
+			p.clearMark();
+		}
+	}
+	
+	public Node<Character> getNode(Character c, Node<Character> p) {
+		for(Node<Character> child : p.getChildren()) {
+			Node<Character> n = getNode(c, child);
+			if(n.getElement().equals(c)) {
+				return n;
+			}
+		}
+		return p;
+	}
+	
+	public void markAncestors(Node<Character> a) {
+		// mark a and all ancestors of a
+		int i = 1;
+		a.setMark(1);
+		while(!myTree.isRoot(a)) {
+			a = a.getParent();
+			a.setMark(++i);
+		}
+	}
+	
+	public int[] findCommonAncestor(Node<Character> b) {
+		// search B, B's parent, grandparent, until marked node is found
+		int path = 0;
+		while(!myTree.isRoot(b)) {
+			if(b.isMarked()) {
+				int[] vals = {b.getMark() - 1, path};
+				return vals;
+			}
+			b = b.getParent();
+			path++;
+		}
+		// check one last time now that b is root
+		if(b.isMarked()) {
+			int[] vals = {b.getMark() - 1, path};
+			return vals;
+		}
+		// common ancestor not found
+		return null;
+	}
+	
+	public String getRelation(Character a, Character b) {
+		Node<Character> nodeA = getNode(a, myTree.root());
+		Node<Character> nodeB = getNode(b, myTree.root());
+		markAncestors(nodeA);
+		int[] paths = findCommonAncestor(nodeB);
+		clearAllMarks(nodeA);
+		return buildRelationString(paths, a, b);
+	}
+	
+	public String buildRelationString(int[] paths, Character charA, Character charB) {
+		int a = paths[0];
+		int b = paths[1];
+		String AisB = charA + " is " + charB;
+		
+		//A is B
+		if(a == 0 && b == 0) {
+			return AisB + ".";
+		} 
+		//A is B's parent
+		else if(a == 0 && b == 1) {
+			return AisB + "'s parent.";
+		} 
+		//A is B's grandparent
+		else if(a == 0 && b == 2) {
+			return AisB + "'s grandparent.";
+		} 
+		//A is B's great-grandparent
+		else if(a == 0 && b == 3) {
+			return AisB + "'s great-grandparent.";
+		} 
+		//A is B's great^(b-2)-grandparent
+		else if(a == 0 && b > 3) {
+			String g = AisB + "'s great-";
+			for(int i = 1; i < b - 2; i++) {
+				g += "great-";
+			}
+			g += "grandparent.";
+			return g;
+		} 
+		//A is B's child
+		else if(a == 1 && b == 0) {
+			return AisB + "'s child.";
+		} 
+		//A is B's grandchild
+		else if(a == 2 && b == 0) {
+			return AisB + "'s grandchild.";
+		} 
+		//A is B's great^(b-2)-grandchild
+		else if(a >= 3 && b == 0) {
+			String g = AisB + "'s great-";
+			for(int i = 1; i < a - 2; i++) {
+				g += "great-";
+			}
+			g += "grandchild.";
+			return g;
+		} 
+		//A is B's sibling
+		else if(a == 1 && b == 1) {
+			return AisB + "'s sibling.";
+		} 
+		//A is B's aunt/uncle
+		else if(a == 1 && b == 2) {
+			return AisB + "'s aunt/uncle.";
+		} 
+		//A is B's great^(b-2)-aunt/uncle
+		else if(a == 1 && b >= 2) {
+			String g = AisB + "'s great-";
+			for(int i = 1; i < b - 2; i++) {
+				g += "great-";
+			}
+			g += "aunt/uncle.";
+			return g;
+		} 
+		//A is B's niece/nephew
+		else if(a == 2 && b == 1) {
+			return AisB + "'s niece/nephew.";
+		} 
+		//A is B's great^(b-2)-niece/nephew
+		else if(a >= 2 && b == 1) {
+			String g = AisB + "'s great-";
+			for(int i = 1; i < a - 2; i++) {
+				g += "great-";
+			}
+			g += "niece/nephew.";
+			return g;
+		} 
+		//A is B's (min(b,a) - 1)th cousin |a - b| times removed.
+		else if(a >= 2 && b >= 2) {
+			int cousin = Integer.min(b, a) - 1;
+			int rem = Math.abs(a - b);
+			return AisB + "'s " + cousin + "th cousin " + rem + " times removed.";
+		}
+		return charA + " is not related to " + charB;
 	}
 }
