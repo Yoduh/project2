@@ -66,7 +66,7 @@ public class Project2 {
 		// populate pretrav array
 		String preString = inputReader.readLine();
 		int size = 0;
-		for(int i = 2; i < preString.length() - 1; i += 3) {
+		for(int i = 2; i < preString.length(); i += 3) {
 			pretrav[size] = preString.charAt(i);
 			size++;
 		}
@@ -74,7 +74,7 @@ public class Project2 {
 		// populate posttrav array
 		String postString = inputReader.readLine();
 		size = 0;
-		for(int i = 2; i < postString.length() - 1; i += 3) {
+		for(int i = 2; i < postString.length(); i += 3) {
 			posttrav[size] = postString.charAt(i);
 			size++;
 		}		
@@ -132,13 +132,16 @@ public class Project2 {
 				return root;
 				
 			} else {
-				while(poststart < size - 1) {
+				int totalLoops = 0;
+				while(totalLoops < size - 1) {
 					// else there is a deeper subtree to find
 					int count = poststart;
 					while(!pretrav[prestart + 1].equals(posttrav[count])) {
 						count++;
+						totalLoops++;
 					}
 					count++; // one more to include the parent
+					totalLoops++;
 					count = count - poststart; // count = number of nodes in subtree
 					prestart++;
 					Node<Character> c = buildTree(count, prestart, poststart);
