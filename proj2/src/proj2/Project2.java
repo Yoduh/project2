@@ -3,9 +3,9 @@ package proj2;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -14,43 +14,54 @@ import proj2.Queue.EmptyQueueException;
 import proj2.Queue.FullQueueException;
 import proj2.Tree.Node;
 
+/**
+ * Constructs a representation of a family tree from listings of its nodes in
+ * preorder and postorder, then answer questions about relationships of pairs of individuals (nodes)
+ * in the tree. Also prints the tree in level-order traversal.
+ * @author aehandlo
+ *
+ */
 public class Project2 {
-	//home file
-	String home = "C:\\Users\\Yoduh\\Desktop\\CSC\\316\\Assignments\\input.txt";
-	//work file
-	String work = "C:\\Users\\ahandlovits\\Desktop\\CSC\\CSC 316\\Assignments\\input.txt";
-	
+	/** Holds pre-traversal array of tree nodes */
 	public Character[] pretrav = new Character[256];
+	/** Holds post-traversal array of tree nodes */
 	public Character[] posttrav = new Character[256];
+	/** Tree to be constructed from pretrav and posttrav */
 	Tree<Character> myTree = new Tree<Character>();
 
-	public Project2() {
-		// TODO Auto-generated constructor stub
-	}
-
+	/**
+	 * Main method launches initialization of program
+	 * @param args Command line arguments (not used)
+	 * @throws FileNotFoundException if file not found
+	 * @throws IOException if probably with input/output
+	 */
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		Project2 obj = new Project2();
 		obj.initialize();
-		
 	}
 	
+	/**
+	 * Opens input and output reader and writer, populates node arrays,
+	 * calls for tree to be built, answers relationship queires, 
+	 * then prints level-order traversal
+	 * @throws FileNotFoundException if files not found
+	 * @throws IOException if problem with input/output
+	 */
 	public void initialize() throws FileNotFoundException, IOException {
-		//prepare input and output streams
+		// prepare input and output streams
+		// for redirection
+		BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+		BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
 		
-		BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
-		BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(System.out));
-		
+		// for files
 		if(!inputReader.ready()) {
 			System.out.println("Enter an input filename (e.g. \"filename.txt\"): ");
 			File inputFileName = new File(inputReader.readLine());
-			System.out.println("file=" + inputFileName.getAbsolutePath());
 			System.out.println("Enter an output filename (e.g. \"filename.txt\"): ");
 			File outputFileName = new File(inputReader.readLine());
-			inputReader = new BufferedReader(new FileReader(inputFileName));
-			outputWriter = new BufferedWriter(new FileWriter(outputFileName));
+			inputReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFileName), "UTF-8"));
+			outputWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName), "UTF-8"));
 		}
-		
-		//inputReader = new BufferedReader(new FileReader(new File(work)));
 		
 		// populate pretrav array
 		String preString = inputReader.readLine();
@@ -66,64 +77,50 @@ public class Project2 {
 		for(int i = 2; i < postString.length() - 1; i += 3) {
 			posttrav[size] = postString.charAt(i);
 			size++;
-		}
-		
-		//debug
-		/*size = 0;
-		while(pretrav[size] != null) {
-			System.out.print(pretrav[size] + ", ");
-			size++;
-		}
-		size = 0;
-		System.out.println();
-		while(pretrav[size] != null) {
-			System.out.print(posttrav[size] + ", ");
-			size++;
-		}*/
-		
+		}		
 		
 		myTree.addRoot(buildTree(size, 0, 0));
 		
+		// answer relationship queries
 		while(inputReader.ready()) {
 			String relation = inputReader.readLine();
 			if(!relation.isEmpty() && relation.charAt(0) == '?') {
 				outputWriter.write(getRelation(relation.charAt(2), relation.charAt(5)) + "\n");
-				//System.out.println(getRelation(relation.charAt(2), relation.charAt(5)));
 			}
 		}
 		
-		/*System.out.println(getRelation('H', 'X'));
-		System.out.println(getRelation('X', 'H'));
-		System.out.println(getRelation('B', 'F'));
-		System.out.println(getRelation('C', 'B'));
-		System.out.println(getRelation('B', 'R'));
-		System.out.println(getRelation('P', 'Q'));
-		System.out.println(getRelation('H', 'N'));
-		System.out.println(getRelation('B', 'N'));*/
+		// write level-order traversal
 		try {
 			String tree = printLevelOrderTree();
 			if(tree != null) {
 				outputWriter.write(tree + "\n");
 			}
 		} catch (FullQueueException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (EmptyQueueException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		// close streams
 		inputReader.close();
 		outputWriter.close();
 	}
 
+	/**
+	 * Recursive function builds tree using preorder and postorder arrays
+	 * @param size Size of tree or sub-tree
+	 * @param prestart Location to read from pre-traversal array
+	 * @param poststart Location to read from post-traversal array
+	 * @return Root of tree
+	 */
 	public Node<Character> buildTree(int size, int prestart, int poststart) {
 		Node<Character> root = new Node<Character>(pretrav[prestart], null, null);
 		
-		if(pretrav[prestart] == null) {
-			return null;
+		// base case
+		if(size == 1) {
+			return root;
 		}
-		if(size > 1) {
+		else if(size > 1) {
 			if(pretrav[prestart] == posttrav[poststart + size - 1] && pretrav[prestart + 1] == posttrav[poststart]) {
 				// start of pretrav == end of posttrav, and pretrav[1] == posttrav[0], so we have a final subtree here
 				// create children and add to current subtree root node
@@ -138,13 +135,11 @@ public class Project2 {
 				while(poststart < size - 1) {
 					// else there is a deeper subtree to find
 					int count = poststart;
-					
-					while(pretrav[prestart + 1] != posttrav[count]) {
+					while(!pretrav[prestart + 1].equals(posttrav[count])) {
 						count++;
 					}
 					count++; // one more to include the parent
 					count = count - poststart; // count = number of nodes in subtree
-					// recursive call with new prestart/poststart?
 					prestart++;
 					Node<Character> c = buildTree(count, prestart, poststart);
 					myTree.addChild(root, c);
@@ -158,6 +153,12 @@ public class Project2 {
 		return root;
 	}
 	
+	/**
+	 * Constructs string of level-order traversal of tree
+	 * @return String of level-order traversal
+	 * @throws FullQueueException if Queue is full
+	 * @throws EmptyQueueException if Queue is empty
+	 */
 	@SuppressWarnings("unchecked")
 	public String printLevelOrderTree() throws FullQueueException, EmptyQueueException {
 		String tree = "";
@@ -186,6 +187,10 @@ public class Project2 {
 		return tree;
 	}
 	
+	/**
+	 * Clear all the marks for a node and its sub-tree
+	 * @param p Node to clear all marks from
+	 */
 	public void clearAllMarks(Node<Character> p) {
 		p.clearMark();
 		while(!myTree.isRoot(p)) {
@@ -194,6 +199,12 @@ public class Project2 {
 		}
 	}
 	
+	/**
+	 * Finds a node using postorder traversal of the tree
+	 * @param c Value of node being searched for
+	 * @param p Node of sub-tree being searched
+	 * @return Node being searched for
+	 */
 	public Node<Character> getNode(Character c, Node<Character> p) {
 		for(Node<Character> child : p.getChildren()) {
 			Node<Character> n = getNode(c, child);
@@ -204,8 +215,11 @@ public class Project2 {
 		return p;
 	}
 	
+	/**
+	 * Mark a given node and all its ancestors
+	 * @param a The node to mark along with its ancestors
+	 */
 	public void markAncestors(Node<Character> a) {
-		// mark a and all ancestors of a
 		int i = 1;
 		a.setMark(1);
 		while(!myTree.isRoot(a)) {
@@ -214,6 +228,13 @@ public class Project2 {
 		}
 	}
 	
+	/**
+	 * Find common ancestor of given node
+	 * @param b Node searching for an ancestor
+	 * @return Array that contains two ints. 
+	 * First int is the length of path from A (node that all marks are based on) to ancestor
+	 * Second int is the length of path from B to the ancestor 
+	 */
 	public int[] findCommonAncestor(Node<Character> b) {
 		// search B, B's parent, grandparent, until marked node is found
 		int path = 0;
@@ -234,6 +255,12 @@ public class Project2 {
 		return null;
 	}
 	
+	/**
+	 * Get relation between two nodes given their node values
+	 * @param a Value of first node
+	 * @param b Value of second node
+	 * @return String that details the relationship between the two nodes
+	 */
 	public String getRelation(Character a, Character b) {
 		Node<Character> nodeA = getNode(a, myTree.root());
 		Node<Character> nodeB = getNode(b, myTree.root());
@@ -243,6 +270,13 @@ public class Project2 {
 		return buildRelationString(paths, a, b);
 	}
 	
+	/**
+	 * Constructs String that details the relationship between two nodes
+	 * @param paths The lengths of the nodes paths to a common ancestor
+	 * @param charA Value of the first node
+	 * @param charB Value of the second node
+	 * @return String of the relation
+	 */
 	public String buildRelationString(int[] paths, Character charA, Character charB) {
 		int a = paths[0];
 		int b = paths[1];

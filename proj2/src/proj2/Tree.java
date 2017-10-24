@@ -1,21 +1,41 @@
 package proj2;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
-/** Concrete implementation of a general tree using a node-based, linked structure. */
+/**
+ * Custom implementation of a node-based general tree able to be constructed when 
+ * only the postorder and preorder traversals of the tree are known.
+ * @author aehandlo
+ *
+ * @param <E> Generic type
+ */
 public class Tree<E> {
 	
+	/** root node of tree */
 	private Node<E> root = null;
+	/** size of tree. always equals zero when first constructed */
 	private int size = 0;
 
-	//---------------- nested Node class ----------------
-	protected static class Node<E> implements Position<E> {
+	/**
+	 * Nested Node class
+	 * @author aehandlo
+	 *
+	 * @param <E> Generic type
+	 */
+	protected static class Node<E> {
+		/** generic value held by the node */
 		private E element;
+		/** link to parent node */
 		private Node<E> parent;
+		/** linked list of children nodes */
 		private LinkedList<Node<E>> children;
+		/** ancestor mark for determining relation queries */
 		private int mark;
 		
+		/**
+		 * Constructor
+		 * @param e Node value
+		 * @param above Parent node
+		 * @param below Children nodes
+		 */
 		public Node(E e, Node<E> above, LinkedList<Node<E>> below) {
 			element = e;
 			parent = above;
@@ -25,66 +45,105 @@ public class Tree<E> {
 			}
 			mark = 0;
 		}
-		// accessor methods
+		
 		/**
 		* Returns the element stored at this position.
-		*
 		* @return the stored element
 		* @throws IllegalStateException if position no longer valid
 		*/
-		@Override
 		public E getElement() throws IllegalStateException {
 			if(element == null) {
 				throw new IllegalStateException("Position no longer valid");
 			}
 			return element;
 		}
-		
+		/**
+		 * Get parent node
+		 * @return parent
+		 */
 		public Node<E> getParent() {
-			return parent;
+			if(parent != null) {
+				return parent;
+			}
+			return null;
 		}
-		
+		/**
+		 * Get children nodes
+		 * @return children
+		 */
 		public LinkedList<Node<E>> getChildren() {
-			return children;
+			if(children != null) {
+				return children;
+			}
+			return null;
 		}
-		// update methods		
+		/**
+		 * Set value of node
+		 * @param e Value
+		 */
 		public void setElement(E e) {
 			element = e;
 		}
-		
+		/**
+		 * Set parent node
+		 * @param p Parent
+		 */
 		public void setParent(Node<E> p) {
 			parent = p;
 		}
-		
+		/**
+		 * Set children nodes
+		 * @param below Children
+		 */
 		public void setChildren(LinkedList<Node<E>> below) {
 			children = below;
 		}
-		
+		/**
+		 * Set single child node
+		 * @param c Single child
+		 */
 		public void setChild(Node<E> c) {
 			children.add(c);
 		}
-		
+		/**
+		 * Set mark value
+		 * @param m Mark value
+		 */
 		public void setMark(int m) {
 			mark = m;
 		}
-		
+		/**
+		 * Set mark back to default (zero)
+		 */
 		public void clearMark() {
 			mark = 0;
 		}
-		
+		/**
+		 * Get mark value
+		 * @return Mark value
+		 */
 		public int getMark() {
 			return mark;
 		}
-		
+		/**
+		 * Find if node is marked or not
+		 * @return True if node is marked, false if not
+		 */
 		public boolean isMarked() {
 			if(mark > 0) {
 				return true;
 			}
 			return false;
 		}
-	} //----------- end of nested Node class -----------
+	}
 	
-	/** Factory function to create a new node storing element e. */
+	/**
+	 * Factory function to create a new node storing element e.
+	 * @param e Value of node
+	 * @param parent Parent of node
+	 * @param children Children of node
+	 * @return Newly created node
+	 */
 	protected Node<E> createNode(E e, Node<E> parent, LinkedList<Node<E>> children) {
 		return new Node<E>(e, parent, children);
 	}
@@ -94,36 +153,71 @@ public class Tree<E> {
 	 */
 	public Tree() {
 	}
-
+	/**
+	 * Get root node
+	 * @return root
+	 */
 	public Node<E> root() {
 		return root;
 	}
-
-	public Node<E> parent(Node<E> p) throws IllegalArgumentException {
+	/**
+	 * Get parent node of given node
+	 * @param p Node needing parent returned
+	 * @return Parent of node
+	 * @throws IllegalArgumentException if node has no parent
+	 */
+	public Node<E> parent(Node<E> p) {
+		if(p.getParent() == null) {
+			throw new IllegalArgumentException("Node has no parent");
+		}
 		return p.getParent();
 	}
-
-	public LinkedList<Node<E>> children(Node<E> p) throws IllegalArgumentException {
+	/**
+	 * Get children of given node
+	 * @param p Node needing children returned
+	 * @return Children of node
+	 * @throws IllegalArgumentException if node has no children
+	 */
+	public LinkedList<Node<E>> children(Node<E> p) {
+		if(p.getChildren() == null) {
+			throw new IllegalArgumentException("Node has no children");
+		}
 		return p.getChildren();
 	}
-
-	public int numChildren(Node<E> p) throws IllegalArgumentException {
+	/**
+	 * Get number of children of given node
+	 * @param p Node needing number of children returned
+	 * @return Number of children
+	 */
+	public int numChildren(Node<E> p) {
 		LinkedList<Node<E>> list = p.getChildren();
 		return list.size();
 	}
-	
+	/**
+	 * Add child to given node
+	 * @param p Node to add child to
+	 * @param c Child being added
+	 */
 	public void addChild(Node<E> p, Node<E> c) {
 		p.setChild(c);
 		size++;
 	}
-	
-	public Node<E> addRoot(Node<E> e) throws IllegalStateException {
+	/**
+	 * Add root to tree
+	 * @param e Root node
+	 * @return Root node
+	 */
+	public Node<E> addRoot(Node<E> e) {
 		root = e;
 		size = 1;
 		return root;
 	}
-
-	public boolean isRoot(Node<E> p) throws IllegalArgumentException {
+	/**
+	 * Determine if node is root
+	 * @param p Node to find out if root or not
+	 * @return True if node is root, false if not
+	 */
+	public boolean isRoot(Node<E> p) {
 		if(isEmpty() || p == null) {
 			return false;
 		} else if(p.getElement() == root.getElement()) {
@@ -131,75 +225,21 @@ public class Tree<E> {
 		}
 		return false;
 	}
-
+	/**
+	 * Get number of nodes in the tree
+	 * @return Number of tree nodes
+	 */
 	public int size() {
 		return size;
 	}
-
+	/**
+	 * Determine if tree is empty
+	 * @return True if tree is empty, false if not
+	 */
 	public boolean isEmpty() {
 		if(size == 0) {
 			return true;
 		}
 		return false;
 	}
-
-	public Iterator<E> iterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public Iterable<Node<E>> positions() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	/*
-	public void clearAllMarks(Node<E> p) {
-		p.clearMark();
-		if(numChildren(p) > 0) {
-			for(Node<E> child : p.getChildren()) {
-				clearAllMarks(child);
-			}
-		}
-	}
-	
-	public Node<E> getNode(E e, Node<E> p) {
-		for(Node<E> child : p.getChildren()) {
-			Node<E> c = getNode(e, child);
-			if(c.getElement().equals(e)) {
-				return c;
-			}
-		}
-		return p;
-	}
-	
-	public void markAncestors(Node<E> a) {
-		// mark a and all ancestors of a
-		int i = 0;
-		a.setMark(0);
-		while(!isRoot(a)) {
-			a = a.getParent();
-			a.setMark(++i);
-		}
-	}
-	
-	public int[] findCommonAncestor(Node<E> b) {
-		// search B, B's parent, grandparent, until marked node is found
-		int path = 0;
-		while(!isRoot(b)) {
-			if(b.isMarked()) {
-				int[] vals = {b.getMark(), path};
-				return vals;
-			}
-			b = b.getParent();
-			path++;
-		}
-		// check one last time now that b is root
-		if(b.isMarked()) {
-			int[] vals = {b.getMark(), path};
-			return vals;
-		}
-		// common ancestor not found
-		return null;
-	}
-	*/
 }
