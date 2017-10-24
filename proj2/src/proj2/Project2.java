@@ -121,9 +121,7 @@ public class Project2 {
 			return root;
 		}
 		else if(size > 1) {
-			if(pretrav[prestart] == posttrav[poststart + size - 1] && pretrav[prestart + 1] == posttrav[poststart]) {
-				// start of pretrav == end of posttrav, and pretrav[1] == posttrav[0], so we have a final subtree here
-				// create children and add to current subtree root node
+			if(isFinalSubTree(prestart, poststart, size)) {
 				for(int i = 0; i < size - 1; i++) {
 					Node<Character> c = buildTree(1, prestart + i + 1, poststart + i);
 					myTree.addChild(root, c);
@@ -154,6 +152,25 @@ public class Project2 {
 			}
 		}
 		return root;
+	}
+	
+	/**
+	 * Determines if a given subtree is a final subtree (i.e. it has only leaves)
+	 * @param prestart index where currently in the preorder of the tree
+	 * @param poststart index where currently in the postorder of the tree
+	 * @param size size of the subtree
+	 * @return true if this is a final subtree, false if not
+	 */
+	public boolean isFinalSubTree(int prestart, int poststart, int size) {
+		if(pretrav[prestart] != posttrav[poststart + size - 1]) {
+			return false;
+		}
+		for(int i = 0; i < size; i++) {
+			if(pretrav[prestart + i] != posttrav[poststart + size - i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
